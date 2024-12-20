@@ -1,0 +1,38 @@
+import Foundation
+
+protocol PlaylistSaverProtocol: MediaSaverProtocol {
+    func createPlaylist(title: String) throws -> UUID
+    func removePlaylist(playlist: Playlist) throws
+    func fetchPlaylist(id: UUID) throws -> Playlist?
+    func savePlaylist(playlist: Playlist) throws
+    func fetchAllPlaylists() throws -> [Playlist]
+}
+
+class PlaylistSaver: MediaSaver, PlaylistSaverProtocol {
+    
+    func createPlaylist(title: String) throws -> UUID {
+        let id = UUID()
+        let playlist = Playlist(content: [MediaFile](), title: title, id: id)
+        try savePlaylist(playlist: playlist)
+        NotificationCenter.default.post(name: NotificationCenterNames.updatedPlaylists, object: nil)
+        return id
+    }
+    
+    func savePlaylist(playlist: Playlist) throws {
+        try dataManager.savePlaylist(data: playlist, id: playlist.id)
+        NotificationCenter.default.post(name: NotificationCenterNames.updatedPlaylists, object: nil)
+    }
+    
+    func removePlaylist(playlist: Playlist) throws {
+        try dataManager.removePlaylist(id: playlist.id)
+        NotificationCenter.default.post(name: NotificationCenterNames.updatedPlaylists, object: nil)
+    }
+    
+    func fetchPlaylist(id: UUID) throws -> Playlist? {
+        try dataManager.fetchPlaylist(id: id)
+    }
+    
+    func fetchAllPlaylists() throws -> [Playlist] {
+        try dataManager.fetchAllPlaylists()
+    }
+}
